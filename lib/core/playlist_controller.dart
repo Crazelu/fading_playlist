@@ -158,7 +158,6 @@ class PlaylistController {
           track: track,
           onDownloadSuccess: (downloadedTrack, file) async {
             try {
-              _logger.log("Adding player for $downloadedTrack");
               final player = AudioPlayer();
               await player.load(file.path);
               _players.add(player);
