@@ -53,8 +53,10 @@ class _PlaylistViewState extends State<PlaylistView> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       //source: https://lottiefiles.com/88944-vinyl-loading
-                      Lottie.asset("assets/vinyl-loading.json"),
-                      const SizedBox(height: 16),
+                      Padding(
+                        padding: const EdgeInsets.all(32),
+                        child: Lottie.asset("assets/vinyl-loading.json"),
+                      ),
                       const CustomText(
                         text: "Getting your playlist ready...",
                         fontSize: 16,
