@@ -1,6 +1,6 @@
 import 'dart:async';
-import 'package:dart_downloader/dart_downloader.dart';
 import 'package:fading_playlist/core/audio_player.dart';
+import 'package:fading_playlist/core/audio_downloader.dart';
 import 'package:fading_playlist/core/logger.dart';
 import 'package:fading_playlist/models/downloaded_track.dart';
 import 'package:fading_playlist/models/track.dart';
@@ -21,6 +21,12 @@ class PlaylistController {
   static ValueNotifier<List<DownloadedTrack>> get downloadedTracksNotifer =>
       _downloadedTracksNotifer;
 
+  static final ValueNotifier<int> _currentPlayerIndexNotifier =
+      ValueNotifier(0);
+
+  static ValueNotifier<int> get currentPlayerIndexNotifier =>
+      _currentPlayerIndexNotifier;
+
   static ValueNotifier<int> getRefreshNotifier(int index) =>
       _players[index].refreshNotifier;
 
@@ -30,6 +36,11 @@ class PlaylistController {
 
   static Duration? getDuration(int index) {
     return _players[index].duration;
+  }
+
+  static void _setCurrentPlayerIndex(int index) {
+    _currentPlayerIndex = index;
+    _currentPlayerIndexNotifier.value = index;
   }
 
   static void _subscribeToStream() {
@@ -112,9 +123,10 @@ class PlaylistController {
             case 0:
               _currentPlayer.stopAudio();
               nextPlayer.setVolume(1);
-              _currentPlayerIndex = nextIndex;
+              _setCurrentPlayerIndex(nextIndex);
               _currentSongDuration = _currentPlayer.duration;
               nextPlayer.play();
+              _onNext(nextIndex);
               _subscribeToStream();
               break;
             default:
@@ -130,59 +142,130 @@ class PlaylistController {
     try {
       //download all tracks and load their players
 
-      await Future.forEach(
-        tracks,
-        (track) async {
-          try {
-            final downloader = DartDownloader();
-            final file = await downloader.download(
-              url: track.url,
-              deleteIfDownloadedFilePathExists: true,
-            );
-            if (file != null) {
+      for (var track in tracks) {
+        AudioDownloader.download(
+          track: track,
+          onDownloadSuccess: (downloadedTrack, file) async {
+            try {
+              _logger.log("Adding player for $downloadedTrack");
               final player = AudioPlayer();
-              _players.add(player);
               await player.load(file.path);
+              _players.add(player);
 
               final downloadedTracks = [..._downloadedTracksNotifer.value];
               downloadedTracks.add(
-                DownloadedTrack(
-                  track: file,
-                  title: track.title,
-                  artist: track.artist,
-                ),
+                DownloadedTrack.withTrack(file, downloadedTrack),
               );
               _downloadedTracksNotifer.value = downloadedTracks;
+            } catch (e) {
+              _logger.log(
+                "loadPlaylist AudioDownloader.download for ${track.title} -> $e",
+              );
             }
-          } catch (e) {
-            _logger.log("loadPlaylist Future -> $e");
-          }
-        },
-      );
+          },
+        );
+      }
     } catch (e) {
       _logger.log("loadPlaylist -> $e");
     }
   }
 
-  static Future<void> play(int index) async {
+  static void _onNext(int index) async {
+    int prevIndex = index - 1;
+    if (prevIndex < 0) prevIndex = trackCount - 1;
+
+    final oldPlayer = _players[prevIndex];
+
+    final newPlayer = AudioPlayer();
+    oldPlayer.stopAudio();
+    oldPlayer.seek(0);
+
+    await newPlayer.load(_downloadedTracksNotifer.value[prevIndex].track.path);
+    _players[prevIndex] = newPlayer;
+    _players[prevIndex].refresh();
+    oldPlayer.dispose();
+  }
+
+  static Future<void> play(
+    int index, {
+    bool next = false,
+    bool previous = false,
+  }) async {
     try {
-      _currentPlayerIndex = index;
+      _setCurrentPlayerIndex(index);
 
       _currentSongDuration = _currentPlayer.duration;
       _currentPlayer.setVolume(1);
       _currentPlayer.play();
+      _currentPlayer.refresh();
+
       _subscribeToStream();
 
+      if (next) {
+        _onNext(index);
+      }
+
+      if (previous) {
+        int nextIndex = index + 1;
+        if (nextIndex > trackCount + 1) nextIndex = 0;
+
+        final oldPlayer = _players[nextIndex];
+
+        final newPlayer = AudioPlayer();
+        oldPlayer.stopAudio();
+        oldPlayer.seek(0);
+
+        await newPlayer
+            .load(_downloadedTracksNotifer.value[nextIndex].track.path);
+        _players[nextIndex] = newPlayer;
+        _players[nextIndex].refresh();
+        oldPlayer.dispose();
+      }
+
       for (int i = 0; i < _players.length; i++) {
-        if (i != _currentPlayerIndex) {
-          _players[i].stopAudio();
-          _players[i].seek(0);
+        if (i != _currentPlayerIndex && _players[i].playing) {
+          final newPlayer = AudioPlayer();
+          final oldPlayer = _players[i];
+          oldPlayer.stopAudio();
+          oldPlayer.seek(0);
+
+          await newPlayer.load(_downloadedTracksNotifer.value[i].track.path);
+          _players[i] = newPlayer;
           _players[i].refresh();
+
+          oldPlayer.dispose();
+          break;
         }
       }
     } catch (e) {
       _logger.log("play -> $e");
     }
+  }
+
+  static Future<void> playNext() async {
+    _currentPlayer.stopAudio();
+    _currentPlayer.refresh();
+
+    int nextIndex = _currentPlayerIndex + 1;
+
+    if (nextIndex > _players.length - 1) {
+      nextIndex = 0;
+    }
+
+    play(nextIndex, next: true);
+  }
+
+  static Future<void> playPrevious() async {
+    _currentPlayer.stopAudio();
+    _currentPlayer.refresh();
+
+    int prevIndex = _currentPlayerIndex - 1;
+
+    if (prevIndex < 0) {
+      prevIndex = 0;
+    }
+
+    play(prevIndex, previous: true);
   }
 
   static Future<void> pause(int index) async {

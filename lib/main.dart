@@ -28,6 +28,9 @@ class FadingPlaylistTransitionApp extends StatelessWidget {
             900: Colors.black,
           },
         ),
+        primaryColor: Colors.white,
+        primaryColorLight: Colors.white,
+        primaryColorDark: Colors.black,
       ),
       home: const PlaylistView(),
     );
