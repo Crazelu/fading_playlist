@@ -11,7 +11,7 @@ class Track {
     this.coverImage = "",
   });
 
-  //CREDITS: https://trendybeatz.com/
+  //Source: https://trendybeatz.com/
   static List<Track> tracks = const [
     Track(
       url:

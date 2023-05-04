@@ -1,9 +1,9 @@
 import 'package:fading_playlist/core/playlist_controller.dart';
 import 'package:fading_playlist/models/downloaded_track.dart';
 import 'package:fading_playlist/models/track.dart';
-import 'package:fading_playlist/presentation/widgets/custom_text.dart';
 import 'package:fading_playlist/presentation/widgets/now_playing_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 
 class PlaylistView extends StatefulWidget {
   const PlaylistView({super.key});
@@ -47,8 +47,9 @@ class _PlaylistViewState extends State<PlaylistView> {
             valueListenable: PlaylistController.downloadedTracksNotifer,
             builder: (_, tracks, __) {
               if (tracks.isEmpty) {
-                return const Center(
-                  child: CustomText(text: "Downloading your playlist..."),
+                return Center(
+                  child: Lottie.asset("assets/vinyl-loading.json"),
+                  //source: https://lottiefiles.com/88944-vinyl-loading
                 );
               }
 
