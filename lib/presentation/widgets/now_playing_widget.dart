@@ -99,6 +99,8 @@ class _NowPlayingState extends State<NowPlaying> {
 
       PlaylistController.getRefreshNotifier(index)
           .addListener(_listenToPlaybackStream);
+
+      setState(() {});
     }
     super.didUpdateWidget(oldWidget);
   }
