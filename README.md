@@ -2,7 +2,7 @@
 
 A Flutter app showcasing implementation of fading transition between audio tracks in a playlist.
 
-[Download APK](https://drive.google.com/u/0/uc?id=1Pq7cUpH9QNbvfhFmBPKCgA-veVm1GS8l&export=download)
+[Download APK](https://drive.google.com/u/0/uc?id=1BCuowR-qpeRpraR2Tbgb6a8Tc4NN8JIr&export=download)
 
 ## Screenshots 📷
 
