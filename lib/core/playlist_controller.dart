@@ -18,6 +18,7 @@ class PlaylistController {
 
   static final ValueNotifier<List<DownloadedTrack>> _downloadedTracksNotifer =
       ValueNotifier([]);
+
   static ValueNotifier<List<DownloadedTrack>> get downloadedTracksNotifer =>
       _downloadedTracksNotifer;
 
@@ -27,22 +28,30 @@ class PlaylistController {
   static ValueNotifier<int> get currentPlayerIndexNotifier =>
       _currentPlayerIndexNotifier;
 
+  ///Notifier attached to [AudioPlayer] at [index] to notify
+  ///listeners of internal state changes so they can resubscribe to necessary streams.
   static ValueNotifier<int> getRefreshNotifier(int index) =>
       _players[index].refreshNotifier;
 
   static StreamSubscription<int>? _streamSubscription;
 
+  ///Number of tracks in the playlist.
   static int get trackCount => _players.length;
 
+  ///Returns duration of track at [index].
   static Duration? getDuration(int index) {
     return _players[index].duration;
   }
 
+  ///Sets [_currentPlayerIndex] state
   static void _setCurrentPlayerIndex(int index) {
     _currentPlayerIndex = index;
     _currentPlayerIndexNotifier.value = index;
   }
 
+  ///Attaches a listener to [_currentPlayer]'s [playingElapsedTimeStream].
+  ///Current track begins to fade out once there are 10 seconds or less left
+  ///in the playback and the next track begins to fade in.
   static void _subscribeToStream() {
     try {
       _streamSubscription?.cancel();
@@ -125,9 +134,9 @@ class PlaylistController {
               nextPlayer.setVolume(1);
               _setCurrentPlayerIndex(nextIndex);
               _currentSongDuration = _currentPlayer.duration;
+              nextPlayer.refresh();
               nextPlayer.play();
               _onNext(nextIndex);
-              nextPlayer.refresh();
               _subscribeToStream();
               break;
             default:
@@ -139,6 +148,7 @@ class PlaylistController {
     }
   }
 
+  ///Download [tracks] and load [AudioPlayer] for each of them.
   static Future<void> loadPlaylist(List<Track> tracks) async {
     try {
       //download all tracks and load their players
@@ -187,6 +197,9 @@ class PlaylistController {
     oldPlayer.dispose();
   }
 
+  ///Play a track at [index].
+  ///If [next] (skip forward) or [previous] (skip backward) is true,
+  ///the current [AudioPlayer] is disposed and a new one created in it's place.
   static Future<void> play(
     int index, {
     bool next = false,
@@ -243,6 +256,7 @@ class PlaylistController {
     }
   }
 
+  ///Skips forward in the playlist.
   static Future<void> playNext() async {
     _currentPlayer.stopAudio();
     _currentPlayer.refresh();
@@ -256,6 +270,7 @@ class PlaylistController {
     play(nextIndex, next: true);
   }
 
+  ///Skips backward in the playlist.
   static Future<void> playPrevious() async {
     _currentPlayer.stopAudio();
     _currentPlayer.refresh();
@@ -269,6 +284,7 @@ class PlaylistController {
     play(prevIndex, previous: true);
   }
 
+  ///Pauses audio playback for track at [index].
   static Future<void> pause(int index) async {
     try {
       return _players[index].pauseAudio();
@@ -277,6 +293,7 @@ class PlaylistController {
     }
   }
 
+  ///Seeks to [seconds] for track at [index].
   static Future<void> seek(int index, int seconds) async {
     try {
       await _players[index].seek(seconds);
@@ -285,6 +302,7 @@ class PlaylistController {
     }
   }
 
+  ///Stops audio playback for track at [index].
   static Future<void> stopAudio(int index) async {
     try {
       await _players[index].stopAudio();
@@ -293,14 +311,17 @@ class PlaylistController {
     }
   }
 
+  ///Stream of playback time elapsed in seconds for track at [index].
   static Stream<int> playingElapsedTimeStream(int index) {
     return _players[index].playingElapsedTimeStream();
   }
 
+  ///Stream of playing state for track at [index].
   static Stream<bool> playingStateStream(int index) {
     return _players[index].playingStateStream();
   }
 
+  ///Release resources.
   static void dispose() {
     _streamSubscription?.cancel();
     for (final player in _players) {

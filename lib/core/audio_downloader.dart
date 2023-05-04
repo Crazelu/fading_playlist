@@ -22,7 +22,6 @@ class AudioDownloader {
       final cachedFile = await AudioCache.getFile(fileName: fileName);
 
       if (cachedFile != null) {
-        _logger.log("Retrieved $fileName from cache");
         onDownloadSuccess(track, cachedFile);
         return;
       }

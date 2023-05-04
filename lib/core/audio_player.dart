@@ -79,6 +79,7 @@ class AudioPlayer {
   }
 
   Future<void> dispose() {
+    _refreshNotifier.dispose();
     return _player.dispose();
   }
 }
