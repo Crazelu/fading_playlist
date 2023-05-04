@@ -1,4 +1,4 @@
-import 'package:fading_playlist/presentation/views/playllist_view.dart';
+import 'package:fading_playlist/presentation/views/playlist_view.dart';
 import 'package:flutter/material.dart';
 
 void main() {
