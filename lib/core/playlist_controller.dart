@@ -127,6 +127,7 @@ class PlaylistController {
               _currentSongDuration = _currentPlayer.duration;
               nextPlayer.play();
               _onNext(nextIndex);
+              nextPlayer.refresh();
               _subscribeToStream();
               break;
             default:
