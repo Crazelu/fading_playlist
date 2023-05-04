@@ -2,10 +2,12 @@ import 'dart:io';
 
 class DownloadedTrack {
   final File track;
-  final String name;
+  final String artist;
+  final String title;
 
   const DownloadedTrack({
     required this.track,
-    required this.name,
+    required this.artist,
+    required this.title,
   });
 }

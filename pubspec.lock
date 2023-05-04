@@ -62,10 +62,10 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: a9d2441c26d7b137afa9aacb5f2b123c7b85b795
+      resolved-ref: "8e7401a3b9f857bd8ac90bb5c9ba20f59706a5d1"
       url: "https://github.com/Crazelu/dart_downloader.git"
     source: git
-    version: "0.0.1"
+    version: "0.0.2+1"
   fake_async:
     dependency: transitive
     description:

@@ -114,25 +114,36 @@ class PlaylistController {
     }
   }
 
-  static Future<void> loadPlaylist(List<Track> songs) async {
+  static Future<void> loadPlaylist(List<Track> tracks) async {
     try {
       //download all songs and load their players
 
       await Future.forEach(
-        songs,
-        (song) async {
-          final downloader = DartDownloader();
-          final file = await downloader.download(url: song.url);
-          if (file != null) {
-            final player = AudioPlayer();
-            _players.add(player);
-            await player.load(file.path);
-
-            final downloadedSongs = [..._downloadedTracksNotifer.value];
-            downloadedSongs.add(
-              DownloadedTrack(track: file, name: song.filename),
+        tracks,
+        (track) async {
+          try {
+            final downloader = DartDownloader();
+            final file = await downloader.download(
+              url: track.url,
+              deleteIfDownloadedFilePathExists: true,
             );
-            _downloadedTracksNotifer.value = downloadedSongs;
+            if (file != null) {
+              final player = AudioPlayer();
+              _players.add(player);
+              await player.load(file.path);
+
+              final downloadedTracks = [..._downloadedTracksNotifer.value];
+              downloadedTracks.add(
+                DownloadedTrack(
+                  track: file,
+                  title: track.title,
+                  artist: track.artist,
+                ),
+              );
+              _downloadedTracksNotifer.value = downloadedTracks;
+            }
+          } catch (e) {
+            _logger.log("loadPlaylist Future -> $e");
           }
         },
       );

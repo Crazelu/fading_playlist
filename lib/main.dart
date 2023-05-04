@@ -13,7 +13,21 @@ class FadingPlaylistTransitionApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: MaterialColor(
+          Colors.black.value,
+          {
+            50: Colors.black.withOpacity(.1),
+            100: Colors.black.withOpacity(.2),
+            200: Colors.black.withOpacity(.3),
+            300: Colors.black.withOpacity(.4),
+            400: Colors.black.withOpacity(.5),
+            500: Colors.black.withOpacity(.6),
+            600: Colors.black.withOpacity(.7),
+            700: Colors.black.withOpacity(.8),
+            800: Colors.black.withOpacity(.9),
+            900: Colors.black,
+          },
+        ),
       ),
       home: const PlaylistView(),
     );

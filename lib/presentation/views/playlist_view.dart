@@ -46,7 +46,7 @@ class _PlaylistViewState extends State<PlaylistView> {
                     MusicTrackPlayerWidget(
                       file: tracks[i].track,
                       index: i,
-                      trackName: tracks[i].name,
+                      trackName: "${tracks[i].artist} - ${tracks[i].title}",
                     ),
                 ],
               );
