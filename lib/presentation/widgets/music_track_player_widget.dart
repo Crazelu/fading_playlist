@@ -83,6 +83,8 @@ class _MusicTrackPlayerWidgetState extends State<MusicTrackPlayerWidget> {
   void initState() {
     super.initState();
     Future.microtask(() => _loadDuration());
+    PlaylistController.getRefreshNotifier(index)
+        .addListener(_listenToPlaybackStream);
   }
 
   @override
@@ -90,6 +92,8 @@ class _MusicTrackPlayerWidgetState extends State<MusicTrackPlayerWidget> {
     PlaylistController.dispose();
     _elapsedTimeSubscription?.cancel();
     _playingStateSubscription?.cancel();
+    PlaylistController.getRefreshNotifier(index)
+        .removeListener(_listenToPlaybackStream);
     super.dispose();
   }
 

@@ -21,7 +21,12 @@ class PlaylistController {
   static ValueNotifier<List<DownloadedTrack>> get downloadedTracksNotifer =>
       _downloadedTracksNotifer;
 
+  static ValueNotifier<int> getRefreshNotifier(int index) =>
+      _players[index].refreshNotifier;
+
   static StreamSubscription<int>? _streamSubscription;
+
+  static int get trackCount => _players.length;
 
   static Duration? getDuration(int index) {
     return _players[index].duration;
@@ -32,18 +37,25 @@ class PlaylistController {
       _streamSubscription?.cancel();
 
       AudioPlayer nextPlayer;
-      int nextIndex = _currentPlayerIndex + 1;
-
-      if (nextIndex > _players.length - 1) {
-        nextIndex = 0;
-      }
-      nextPlayer = _players[nextIndex];
 
       _streamSubscription = _currentPlayer.playingElapsedTimeStream().listen(
         (seconds) {
           if (_currentSongDuration == null) return;
 
+          int nextIndex = _currentPlayerIndex + 1;
+
+          if (nextIndex > _players.length - 1) {
+            nextIndex = 0;
+          }
+          nextPlayer = _players[nextIndex];
+
           final secondsLeft = _currentSongDuration!.inSeconds - seconds;
+
+          if (secondsLeft > 10 && nextPlayer.playing) {
+            nextPlayer.stopAudio();
+            nextPlayer.seek(0);
+            nextPlayer.refresh();
+          }
 
           //once it's 10 seconds (or less) left for the song to end,
           //reduce the volume of the current player
@@ -116,7 +128,7 @@ class PlaylistController {
 
   static Future<void> loadPlaylist(List<Track> tracks) async {
     try {
-      //download all songs and load their players
+      //download all tracks and load their players
 
       await Future.forEach(
         tracks,
@@ -163,7 +175,9 @@ class PlaylistController {
 
       for (int i = 0; i < _players.length; i++) {
         if (i != _currentPlayerIndex) {
+          _players[i].stopAudio();
           _players[i].seek(0);
+          _players[i].refresh();
         }
       }
     } catch (e) {

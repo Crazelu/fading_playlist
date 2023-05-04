@@ -43,9 +43,9 @@ class Track {
     ),
     Track(
       url:
-          "https://cdn.trendybeatz.com/audio/Rema-Charm-New-Track-(TrendyBeatz.com).mp3",
-      artist: "Rema",
-      title: "Charm",
+          "https://cdn.trendybeatz.com/audio/Wizkid-Ft-Ayra-Starr-2-Sugar-(TrendyBeatz.com).mp3",
+      artist: "Wizkid ft Ayra Starr",
+      title: "2 Sugar",
     ),
   ];
 }

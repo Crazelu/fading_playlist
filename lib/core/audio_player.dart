@@ -1,4 +1,5 @@
 import 'package:fading_playlist/core/logger.dart';
+import 'package:flutter/foundation.dart';
 import 'package:just_audio/just_audio.dart' as audio;
 
 class AudioPlayer {
@@ -6,7 +7,16 @@ class AudioPlayer {
 
   late final _logger = Logger(AudioPlayer);
 
+  late final ValueNotifier<int> _refreshNotifier = ValueNotifier(0);
+  ValueNotifier<int> get refreshNotifier => _refreshNotifier;
+
+  bool get playing => _player.playing;
+
   Duration? get duration => _player.duration;
+
+  void refresh() {
+    _refreshNotifier.value = DateTime.now().millisecondsSinceEpoch;
+  }
 
   Future<Duration?> load(String filePath) async {
     try {
@@ -46,7 +56,7 @@ class AudioPlayer {
 
   Future<void> stopAudio() async {
     try {
-      await _player.stop();
+      if (_player.playing) await _player.stop();
     } catch (e) {
       _logger.log(e);
     }

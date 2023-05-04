@@ -42,7 +42,7 @@ class _PlaylistViewState extends State<PlaylistView> {
               return Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  for (int i = 0; i < tracks.length; i++)
+                  for (int i = 0; i < PlaylistController.trackCount; i++)
                     MusicTrackPlayerWidget(
                       file: tracks[i].track,
                       index: i,
