@@ -11,7 +11,7 @@ class FadingPlaylistTransitionApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Fading Playlist Demo',
       theme: ThemeData(
         primarySwatch: MaterialColor(
           Colors.black.value,
